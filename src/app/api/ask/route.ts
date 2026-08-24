@@ -79,19 +79,35 @@ async function logConversation(sessionId: string, messages: Msg[]) {
   }
 }
 
-function parseSSE(chunk: string, pick: (o: unknown) => string | undefined) {
-  let out = "";
-  for (const line of chunk.split("\n")) {
-    if (!line.startsWith("data:")) continue;
-    const payload = line.slice(5).trim();
-    if (!payload || payload === "[DONE]") continue;
-    try {
-      out += pick(JSON.parse(payload)) ?? "";
-    } catch {
-      /* partial frame — the next chunk completes it */
+/**
+ * SSE frames do not respect network chunk boundaries. One frame can arrive
+ * split mid-JSON, so the parser has to hold the trailing fragment until the
+ * read that completes it. Without that, JSON.parse throws on both halves and
+ * every word in that frame silently vanishes from the answer — which is what
+ * shipped, and what only surfaced once Vercel's chunking replaced localhost's.
+ *
+ * Stateful for exactly that reason: one parser per response, never shared.
+ */
+function makeSSEParser(pick: (o: unknown) => string | undefined) {
+  let buffer = "";
+
+  return function feed(chunk: string): string {
+    buffer += chunk;
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? ""; // incomplete tail — wait for the next read
+    let out = "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      try {
+        out += pick(JSON.parse(payload)) ?? "";
+      } catch {
+        /* genuinely malformed frame — skip it */
+      }
     }
-  }
-  return out;
+    return out;
+  };
 }
 
 async function groq(messages: Msg[]) {
@@ -196,20 +212,23 @@ export async function POST(req: Request) {
    */
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      const feed = makeSSEParser(source.pick);
       let answer = "";
+
+      const emit = (text: string) => {
+        if (!text) return;
+        answer += text;
+        controller.enqueue(encoder.encode(text));
+      };
+
       try {
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
-          const text = parseSSE(
-            decoder.decode(value, { stream: true }),
-            source.pick
-          );
-          if (text) {
-            answer += text;
-            controller.enqueue(encoder.encode(text));
-          }
+          emit(feed(decoder.decode(value, { stream: true })));
         }
+        // A last frame can arrive without its terminating newline.
+        emit(feed("\n"));
       } catch {
         /* upstream cut out mid-answer — close with what we have */
       } finally {

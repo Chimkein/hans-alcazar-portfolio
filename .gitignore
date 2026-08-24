@@ -13,3 +13,6 @@ next-env.d.ts
 
 # scratch
 /incoming
+
+.vercel
+.env*
