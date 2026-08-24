@@ -1,0 +1,373 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   THE BOARD FAB DRAWING
+   Light  = THE DRAWING  · plotted on white paper, gold traces
+   Dark   = THE BOARD    · solder mask, ENIG gold, silkscreen
+   ============================================================ */
+
+:root {
+  /* ground */
+  --paper: #ffffff;
+  --panel: #faf9f5;
+  --panel-2: #f4f2ec;
+
+  /* ink — legend type */
+  --ink: #14171a;
+  --ink-2: #3f464d;   /* body copy — 9.6:1, sits clear of the plot grid */
+  --ink-3: #5a6068;   /* small labels — 6.4:1 */
+
+  /* gold */
+  --gold: #c9a227;        /* traces, pads, outlines — NON-TEXT only */
+  --gold-ink: #7a5d0a;    /* gold as text — 6.2:1 on paper */
+  --gold-dim: #e0cf95;    /* de-energised trace */
+  --gold-deep: #6b5109;   /* control hover — paper text reads 7.5:1 on it */
+
+  /* hover wash: darkens whatever is behind it, grid included */
+  --hover: rgba(20, 23, 26, 0.075);
+
+  /* structure */
+  --rule: #e4e1d7;
+  /* the ground — see BoardField.tsx */
+  --field-via: 0.7;
+  /* Plot grid, deliberately far below the contrast of the lightest text
+     (small labels sit at 6.4:1; these lines land near 1.1:1 on paper). Texture
+     you notice only when you look for it. */
+  --grid-major: rgba(201, 162, 39, 0.11);
+  --grid-fine: rgba(20, 23, 26, 0.028);
+  --column: rgba(20, 23, 26, 0.026);
+
+  --shadow-plot: 0 1px 2px rgba(20, 23, 26, 0.05);
+}
+
+.dark {
+  --paper: #0a0d0c;
+  --panel: #101413;
+  --panel-2: #161b19;
+
+  --ink: #e8ebe7;
+  --ink-2: #9aa39d;
+  --ink-3: #858d87;
+
+  --gold: #c9a227;
+  --gold-ink: #e3be63;
+  --gold-dim: #4a3f1c;
+  --gold-deep: #a8871d;   /* paper text reads 5.7:1 on it */
+
+  --hover: rgba(0, 0, 0, 0.55);
+
+  --rule: #232927;
+  --field-via: 0.62;
+  --grid-major: rgba(201, 162, 39, 0.1);
+  --grid-fine: rgba(232, 235, 231, 0.025);
+  --column: rgba(0, 0, 0, 0.22);
+
+  --shadow-plot: none;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-dim: var(--gold-dim);
+  --color-rule: var(--rule);
+}
+
+/* ---------- base ---------- */
+
+* {
+  border-color: var(--rule);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/**
+ * Semantic type aliases live here, not in `@theme`.
+ *
+ * `@theme inline` substitutes a value into the utilities it generates and never
+ * emits the custom property, so `var(--font-body)` resolved to nothing and the
+ * whole `font-family` declaration became invalid — silently falling back to the
+ * system stack. The colour tokens escaped this only because they are declared in
+ * `:root` first and merely *aliased* in `@theme`.
+ *
+ * They are defined on `body` because that is where next/font puts
+ * `--font-archivo` and friends; on `:root` those would be undefined.
+ */
+body {
+  --font-legend: var(--font-archivo-narrow);
+  --font-body: var(--font-archivo);
+  --font-data: var(--font-spline-mono);
+
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "tnum" 0;
+  overflow-x: hidden;
+}
+
+/* the plot sweep — light and dark are two states of one drawing */
+body,
+.themed {
+  transition: background-color 520ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 520ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- browser surfaces ---------- */
+
+::selection {
+  background: var(--gold);
+  color: #14171a;
+}
+
+.dark ::selection {
+  background: var(--gold);
+  color: #0a0d0c;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+html {
+  scrollbar-color: var(--gold-dim) transparent;
+  scrollbar-width: thin;
+  caret-color: var(--gold-ink);
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: var(--panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+  border: 3px solid var(--panel);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* ---------- the drawing's ground ---------- */
+
+/* The board itself. Carries no texture of its own — the routed field in
+   BoardField.tsx is the ground, and it sits at -z-10 inside this stacking
+   context so it paints above this element's background and below all content.
+
+   `isolation` is deliberate: transform / filter / will-change would also create
+   the context but would make this element the containing block for the fixed
+   net trace and the fixed field. */
+.board {
+  position: relative;
+  isolation: isolate;
+}
+
+/* 96px major lattice over a 16px fine field — engineering paper, running the
+   full width so the drafting stock is visible everywhere. */
+.plot-field {
+  background-image: linear-gradient(to right, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-fine) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-fine) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 16px 16px, 16px 16px;
+  background-position: -1px -1px;
+}
+
+/* A faint surface under the reading column: it settles the copy *into* the
+   ground and knocks the lattice back behind text without erasing it. The wash
+   goes darker than the margins in both themes — lightening it in dark mode made
+   the column read as a raised panel, which is the opposite of a board. Masking the grid
+   out entirely left the middle of the page dead; dimming the grid everywhere
+   lost it in the margins. This does both jobs at once — full lattice outside,
+   muted lattice plus a little substance inside. Feathered edges so the column
+   never reads as a card. */
+.column-wash {
+  background: linear-gradient(
+    to right,
+    transparent 0,
+    var(--column) 5rem,
+    var(--column) calc(100% - 5rem),
+    transparent 100%
+  );
+}
+
+/* ---------- lettering ---------- */
+
+.legend {
+  font-family: var(--font-legend), ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+/* Silkscreen voice, but case left alone — these are brand names, and
+   "N8N" / "NEXT.JS" are not how they are written. */
+.legend-mixed {
+  font-family: var(--font-legend), ui-sans-serif, system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: 0.035em;
+  font-weight: 600;
+}
+
+.data {
+  font-family: var(--font-data), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+.display {
+  font-family: var(--font-legend), ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 0.9;
+  text-wrap: balance;
+}
+
+.prose-board {
+  max-width: 68ch;
+  line-height: 1.65;
+}
+
+/* ---------- board hardware ---------- */
+
+/* a pad: the gold rectangle everything sits on */
+.pad {
+  border: 1px solid var(--gold);
+  background: var(--panel);
+  border-radius: 2px;
+}
+
+/* silkscreen outline — the white/graphite component boundary */
+.silk {
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+
+/* a via: the plated through-hole that anchors a section */
+.via {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-dim);
+  background: var(--paper);
+  transition: border-color 380ms ease, box-shadow 380ms ease,
+    background-color 380ms ease;
+}
+
+.via[data-live="true"] {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
+/* ---------- controls ---------- */
+
+.btn {
+  font-family: var(--font-legend), ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  color: var(--ink);
+  background: transparent;
+  position: relative;
+  transition: background-color 220ms ease, color 220ms ease,
+    border-color 220ms ease;
+}
+
+.btn::before,
+.btn::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.55;
+}
+.btn::before {
+  left: -2.5px;
+}
+.btn::after {
+  right: -2.5px;
+}
+
+.btn:hover {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  color: var(--paper);
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: #14171a;
+}
+.btn-primary::before,
+.btn-primary::after {
+  background: #14171a;
+  opacity: 0.7;
+}
+.btn-primary:hover {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  color: var(--paper);
+}
+.btn-primary:hover::before,
+.btn-primary:hover::after {
+  background: var(--paper);
+}
+
+/* ---------- motion ---------- */
+
+@keyframes plot-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.plot-in {
+  animation: plot-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
