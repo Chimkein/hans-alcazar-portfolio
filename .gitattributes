@@ -1,0 +1,22 @@
+# Git guesses binary by sniffing for NUL bytes, and a small PDF can contain
+# none at all — the generated résumé has zero NULs and eighty LFs, so git
+# classified it as text. With core.autocrlf=true a fresh clone would then
+# rewrite those LFs as CRLFs, shifting every byte offset in the file. PDF
+# cross-reference tables are absolute byte offsets, so the file arrives broken.
+#
+# Nothing below is a formatting preference. It is what keeps binaries intact
+# across a clone.
+
+* text=auto
+
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.gif   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
