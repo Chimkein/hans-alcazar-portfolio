@@ -19,39 +19,28 @@ Then open http://localhost:3000.
 npm run build
 ```
 
-## Before you publish
+## Status
 
-### 1. Put this under version control — do this first
+**Live: https://hans-alcazar.vercel.app** — Vercel project `chimkein/hans-alcazar`,
+deployed from this repository.
 
-There is **no git repository here**. No history, no branches, no way to undo a
-bad edit, and no backup if the folder is lost. `.gitignore` is already written
-and covers `.env*.local`, so the API keys will not be committed.
+All five environment variables are set, for Production and Preview:
 
-```bash
-git init && git add -A && git commit -m "Portfolio: board fab drawing"
-```
-
-### 2. Set the environment variables in Vercel
-
-Settings → Environment Variables. All five, for Production and Preview:
-
-| Variable | Where it comes from |
+| Variable | What it drives |
 |---|---|
 | `GROQ_API_KEY` | Cookie's primary model |
 | `GEMINI_API_KEY` | Cookie's fallback |
 | `SUPABASE_URL` | Chat history — `https://zdvjqnqhfumnbqrnorvx.supabase.co` |
-| `SUPABASE_PUBLISHABLE_KEY` | Chat history — the anon key |
-| `NEXT_PUBLIC_SITE_URL` | **Your real domain, no trailing slash** |
+| `SUPABASE_PUBLISHABLE_KEY` | Chat history — can insert, cannot read back |
+| `NEXT_PUBLIC_SITE_URL` | `https://hans-alcazar.vercel.app` |
 
 `NEXT_PUBLIC_SITE_URL` is the one that matters for search: it drives the
-canonical link, the sitemap, robots.txt, Open Graph and the JSON-LD. The
-fallback in [src/lib/content.ts](src/lib/content.ts) is a guess, and if it is
-wrong Google will canonicalise your page to a host that does not exist.
+canonical link, the sitemap, robots.txt, Open Graph and the JSON-LD. It is baked
+in at build time, so changing it takes a redeploy, not just a settings edit.
 
-Everything in `.env.local` already works locally — this step is only for the
-deployed site.
+## Still to do
 
-### 3. Answer the interview
+### Answer the interview
 
 [KNOWLEDGE-INTERVIEW.md](KNOWLEDGE-INTERVIEW.md) — currently **0 of 12** fields
 filled, so Cookie only knows what is printed on the page. Ask it "is he
@@ -59,14 +48,11 @@ available for work?" today and it correctly says it does not know. That is the
 honest behaviour working, but the interview is what makes the assistant worth
 having.
 
-### 4. Make the two repos public
+### Housekeeping
 
-The Source buttons point at `github.com/Chimkein/ai-content-generator` and
-`github.com/Chimkein/lifeflow`. If those are private they 404 for visitors.
-
-### 5. Housekeeping
-
-- Delete my test rows from `portfolio_conversations` (`wiring-check`, `e2e-…`, `verify-…`).
+- Delete the test rows from `portfolio_conversations` (`wiring-check`, `e2e-…`,
+  `verify-…`, `prod-…`). The table has no SELECT policy by design, so this has to
+  happen in the Supabase SQL editor.
 - `incoming/` holds the four raw capstone screenshots. It is gitignored and can go.
 
 ## Cookie — the assistant
@@ -109,14 +95,14 @@ and a static page with no client-side data fetching.
 
 ## Optional, but worth it
 
-**Screenshots.** There are none on disk for any of the three projects, so the
-project footprints are typographic by design. If you capture a few, the footprint
-component has room for a media slot beside the detail list — that would lift the
-projects section more than any other single change.
+**Capstone screenshots.** The four avocado captures come from sources only
+370–415px wide, so they are soft on a retina display. Recapturing them at native
+resolution is the one remaining quality win on the page.
 
-**Résumé.** `public/Hans-Alcazar-Resume.pdf` is a copy of
-`Hans_Alcazar_Resume.pdf` as of the build date. Replace the file when you update
-the résumé; the filename is referenced in `PROFILE.resume`.
+**Résumé.** `public/Hans-Alcazar-Resume.pdf` is generated, not hand-placed. Edit
+the content in [tools/resume.py](tools/resume.py) and run `python tools/resume.py`
+to rebuild it — it needs `reportlab`, and it writes straight into `public/`. The
+filename is referenced in `PROFILE.resume`, so keep it as it is.
 
 ## Where things live
 
