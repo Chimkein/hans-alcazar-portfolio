@@ -43,16 +43,19 @@ in at build time, so changing it takes a redeploy, not just a settings edit.
 All twelve `PERSONAL` fields are answered, compiled from
 [KNOWLEDGE-INTERVIEW.md](KNOWLEDGE-INTERVIEW.md).
 
-Several of the answers were directives rather than facts — never quote a salary,
-never give out the phone number, offer the résumé on hiring interest, deflect
-politely. Those live in the prompt rules in
-[src/lib/knowledge.ts](src/lib/knowledge.ts) rather than in the data blob,
-because a rule the model is told to follow holds better than a fact it is
-invited to paraphrase.
+Several of the answers were directives rather than facts — never quote a salary
+figure, offer the résumé on hiring interest, deflect personal questions politely,
+never give an address more precise than the general area. Those live in the
+prompt rules in [src/lib/knowledge.ts](src/lib/knowledge.ts) rather than in the
+data blob, because a rule the model is told to follow holds better than a fact it
+is invited to paraphrase.
 
-His phone number is absent from the record entirely, on the same logic: the
-surest way to stop a model handing out a number is for the number never to reach
-it. Note that it is still printed in the contact section and on the résumé PDF.
+The salary range Hans gave is deliberately not in the prompt at all. The only
+reliable way to stop a model quoting a number is for it never to see one.
+
+The avocado capstone answers come from the research paper itself — the real
+title (Evergreen), the team, the 43% postharvest-loss figure that motivates it,
+and the measured results — so the assistant can go deeper than the page does.
 
 ## Still to do
 
