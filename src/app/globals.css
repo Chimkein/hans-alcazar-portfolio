@@ -82,8 +82,23 @@
 
 /* ---------- base ---------- */
 
-* {
-  border-color: var(--rule);
+/**
+ * The default border colour, so a bare `border` needs no colour alongside it.
+ *
+ * It MUST stay inside @layer base. Unlayered, this rule beats every Tailwind
+ * `border-*` utility no matter how specific, because layered CSS always loses to
+ * unlayered CSS — and utilities live in Tailwind's own layer. That is not a
+ * hypothetical: it silently painted all 87 bordered elements on this page the
+ * same grey, including the 65 written `border-gold`, so the sheet rendered as a
+ * grey-outlined copy of a gold-outlined drawing.
+ *
+ * Hand-written classes below (.pad, .via, .btn) are deliberately unlayered and
+ * still win, which is what lets them own their own chrome.
+ */
+@layer base {
+  * {
+    border-color: var(--rule);
+  }
 }
 
 html {
@@ -275,27 +290,6 @@ html {
   border-color: var(--gold);
   background: var(--gold);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent);
-}
-
-/* the floating sheet index — the horizontal index that carries laptop-width
-   sheets, see SheetIndex in NetTrace.tsx.
-
-   Its chrome lives here rather than in Tailwind border utilities because the
-   `* { border-color: var(--rule) }` rule above is unlayered, so it overrides
-   every layered `border-*` utility no matter how specific. A class here is
-   unlayered too, and wins on specificity the way .via and .pad already do. */
-.index-plate {
-  border: 1px solid transparent;
-  background: transparent;
-  transition: border-color 300ms ease, background-color 300ms ease;
-}
-
-/* lifted: the header has scrolled out from under it, so it takes a ground of
-   its own. Solid, not translucent — the board field behind it is a grid, and a
-   see-through plate over a grid is unreadable at 9px. */
-.index-plate[data-lifted="true"] {
-  border-color: color-mix(in srgb, var(--gold) 45%, transparent);
-  background: var(--paper);
 }
 
 /* ---------- controls ---------- */
