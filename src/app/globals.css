@@ -277,6 +277,27 @@ html {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent);
 }
 
+/* the floating sheet index — the horizontal index that carries laptop-width
+   sheets, see SheetIndex in NetTrace.tsx.
+
+   Its chrome lives here rather than in Tailwind border utilities because the
+   `* { border-color: var(--rule) }` rule above is unlayered, so it overrides
+   every layered `border-*` utility no matter how specific. A class here is
+   unlayered too, and wins on specificity the way .via and .pad already do. */
+.index-plate {
+  border: 1px solid transparent;
+  background: transparent;
+  transition: border-color 300ms ease, background-color 300ms ease;
+}
+
+/* lifted: the header has scrolled out from under it, so it takes a ground of
+   its own. Solid, not translucent — the board field behind it is a grid, and a
+   see-through plate over a grid is unreadable at 9px. */
+.index-plate[data-lifted="true"] {
+  border-color: color-mix(in srgb, var(--gold) 45%, transparent);
+  background: var(--paper);
+}
+
 /* ---------- controls ---------- */
 
 .btn {

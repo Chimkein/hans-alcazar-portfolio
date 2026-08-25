@@ -12,6 +12,7 @@ import { SHEET } from "@/lib/content";
 function useSheetPosition() {
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const sections = SHEET.map((s) => document.getElementById(s.id)).filter(
@@ -35,6 +36,17 @@ function useSheetPosition() {
 
     let frame = 0;
     const onScroll = () => {
+      // Past the header band, where the index stops being part of the header and
+      // starts being a thing floating over the drawing. Deliberately outside the
+      // rAF: it is a boolean that flips twice in a whole page, React bails out
+      // when the value is unchanged, and keeping it off the frame clock means it
+      // still tracks when frames are throttled — a backgrounded tab, or a
+      // reduced-power mode — where the plate would otherwise be stranded in
+      // whichever state it was last painted in.
+      setScrolled(window.scrollY > 40);
+
+      // progress is a continuous value repainted on every pixel, so it does want
+      // the frame clock.
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -51,7 +63,7 @@ function useSheetPosition() {
     };
   }, []);
 
-  return { active, progress };
+  return { active, progress, scrolled };
 }
 
 /**
@@ -157,22 +169,30 @@ export function NetTrace() {
 /**
  * The same index, routed horizontally for sheets too narrow to carry the rail.
  *
- * It sits in the header rather than floating over the page: this sheet has no
- * sticky header by design, and bolting a translucent bar to the top edge to
- * solve a layout gap would cost more of the drawing than it buys. The top
- * conductor stays fixed and keeps reporting position after the header scrolls
- * away, which is the job it already had.
+ * Fixed, not part of the header. At these widths it is the only index there is,
+ * so letting it scroll away with the header would leave the reader with nothing
+ * but the progress conductor for the length of the sheet — which is the gap this
+ * component exists to close.
+ *
+ * It is positioned to sit exactly in the header band at rest, so at the top of
+ * the page it reads as part of the header rather than as something stuck on.
+ * Once the header is gone it takes a paper ground and a gold hairline and
+ * becomes a footprint floating over the drawing. The chrome is solid rather than
+ * translucent because the board field behind it is a grid, and a see-through
+ * panel over a grid reads as muddy at 9px type. That chrome is .index-plate in
+ * globals.css, not border utilities here — see the note on the class.
  *
  * Below lg the header has no room left once the monogram and the switch are
  * placed, so it steps aside there.
  */
 export function SheetIndex() {
-  const { active } = useSheetPosition();
+  const { active, scrolled } = useSheetPosition();
 
   return (
     <nav
       aria-label="Sheet index"
-      className="hidden items-center gap-5 lg:max-[1530px]:flex"
+      data-lifted={scrolled ? "true" : "false"}
+      className="index-plate fixed left-1/2 top-[22px] z-50 hidden -translate-x-1/2 items-center gap-5 px-4 py-2 lg:max-[1530px]:flex"
     >
       {SHEET.map((s, i) => (
         <a

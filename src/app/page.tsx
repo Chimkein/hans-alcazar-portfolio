@@ -205,6 +205,7 @@ export default function Home() {
     <div className="board themed min-h-screen">
       <BoardField />
       <NetTrace />
+      <SheetIndex />
       <TestPoint />
 
       {/* ── sheet header ─────────────────────────────────────────── */}
@@ -220,9 +221,6 @@ export default function Home() {
             </span>
           </div>
         </div>
-
-        <SheetIndex />
-
         <ThemeToggle />
       </header>
 
