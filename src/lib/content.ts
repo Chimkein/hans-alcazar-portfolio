@@ -37,13 +37,18 @@ export const PROFILE = {
   phone: "0995 994 8436",
   resume: "/Hans-Alcazar-Resume.pdf",
   /**
-   * The pivot the whole page argues. Every claim here is one the sheet backs
-   * up further down: the nine hours is the paper’s measured 9.32h mean error,
-   * the hardware really was handed over after the defence, and the user counts
-   * are his own — real users on the content tool, friends and family on the hub.
+   * The pivot the whole page argues.
+   *
+   * It leads with where he came from rather than with what he built, because
+   * the projects already have a whole section and the background does not: two
+   * years of paid technical support and the TESDA certifications are the part
+   * a reader would otherwise have to scroll to find. Every claim is one the
+   * fabrication notes below repeat verbatim — the client count, the training,
+   * the certificates — and the last line says self-taught and unfinished
+   * because that is what it is.
    */
   statement:
-    "Computer Engineering graduate building across the whole stack — from an ESP32 sensor array running on-device inference, up to multi-model AI orchestration in Next.js. The capstone shipped: a rig that reads the air around an avocado and calls its remaining shelf life to within about nine hours, now in the hands of the people it was built for. The web work is held to the same test — a content tool with real users behind it, and a self-hosted productivity hub that friends and family actually use.",
+    "Computer Engineering graduate who came up through the hardware side — two years of freelance technical support across 10+ individual and small-business clients, on-the-job training diagnosing machines week after week, TESDA-certified in computer systems servicing, networks and servers. That is where the instinct for the physical layer comes from, and why the range runs the whole way: from an ESP32 sensor array doing on-device inference, up to multi-model AI orchestration in Next.js. Fullstack and AI engineering are the deliberate next step — self-taught, and honestly still in progress.",
 } as const;
 
 /* ------------------------------------------------------------------
