@@ -16,3 +16,7 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# working notes — these carry answers (availability, pay) that the site
+# deliberately never states. They belong in the Obsidian vault, not here.
+/CC-Session-Logs

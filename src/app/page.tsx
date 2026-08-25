@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Portrait } from "@/components/Portrait";
-import { NetTrace } from "@/components/NetTrace";
+import { NetTrace, SheetIndex } from "@/components/NetTrace";
 import { ArrowUpRight, ArrowDown, ArrowUp } from "@/components/Icons";
 import { BrandIcon } from "@/components/BrandIcons";
 import { Shots } from "@/components/Shots";
@@ -220,6 +220,9 @@ export default function Home() {
             </span>
           </div>
         </div>
+
+        <SheetIndex />
+
         <ThemeToggle />
       </header>
 

@@ -61,10 +61,17 @@ and the measured results — so the assistant can go deeper than the page does.
 
 ### Housekeeping
 
-- Delete the test rows from `portfolio_conversations` (`wiring-check`, `e2e-…`,
-  `verify-…`, `prod-…`). The table has no SELECT policy by design, so this has to
-  happen in the Supabase SQL editor.
 - `incoming/` holds the four raw capstone screenshots. It is gitignored and can go.
+
+### A known shape, not a fault
+
+Logging inserts a fresh row per exchange, each holding the whole conversation so
+far, so one ten-turn chat leaves ten rows rather than one. PostgREST cannot
+upsert here — `ON CONFLICT` needs to read the row it would replace, and the
+table deliberately has no SELECT policy. A `SECURITY DEFINER` function taking
+`(session_id, messages)` would collapse it to one row per session without ever
+opening the table to reads. At this traffic it costs nothing; at real traffic it
+is quadratic.
 
 ## Cookie — the assistant
 

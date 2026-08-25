@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { SHEET } from "@/lib/content";
 
 /**
- * The net trace: one continuous gold conductor running the whole sheet.
- * The run above your position is energised, the run below stays hairline, and
- * each section's via lights as you reach it. It is the page's only persistent
- * position indicator — the reason the sheet never needs a sticky header.
+ * Where the reader is on the sheet: which section holds them, and how far the
+ * whole run has gone. Two consumers need this — the left rail and the header
+ * index — and only one of them is ever on screen, so each keeps its own
+ * observer rather than paying for a context that exists to serve one reader.
  */
-export function NetTrace() {
+function useSheetPosition() {
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -51,12 +51,44 @@ export function NetTrace() {
     };
   }, []);
 
+  return { active, progress };
+}
+
+/**
+ * The rail appears at min-[1530px] and nowhere narrower. The number is
+ * geometry, not taste: the rail measures 106px and the content column is a fixed
+ * 76rem centred, so the left margin only clears the column from ~1470px up — but
+ * clearing it and looking right are different thresholds. At the clearing width
+ * the gap is 21px against the 81px the design gets at 1600, which reads as
+ * crowding. 1530 is the narrowest sheet that still leaves the rail ~49px.
+ *
+ * It was 1560, which missed 1920 screens at Windows' 125% scaling by 24px — they
+ * report a 1536 viewport — and there was nothing underneath to catch them, so
+ * every laptop-class sheet had no index at all. Below 1530 the header index now
+ * takes over; see SheetIndex at the bottom of this file.
+ *
+ * The breakpoint is written out literally at all three use sites rather than
+ * held in a constant. Tailwind finds class names by scanning source text, so a
+ * breakpoint composed by string interpolation compiles to nothing at all — no
+ * class is generated and the rail silently never renders, which is exactly the
+ * failure this comment exists to stop someone reintroducing.
+ */
+
+/**
+ * The net trace: one continuous gold conductor running the whole sheet.
+ * The run above your position is energised, the run below stays hairline, and
+ * each section's via lights as you reach it. It is the page's only persistent
+ * position indicator — the reason the sheet never needs a sticky header.
+ */
+export function NetTrace() {
+  const { active, progress } = useSheetPosition();
+
   return (
     <>
-      {/* mobile / tablet: the trace runs across the top edge */}
+      {/* narrow sheets: the trace runs across the top edge */}
       <div
         aria-hidden="true"
-        className="fixed inset-x-0 top-0 z-50 h-px bg-gold-dim min-[1560px]:hidden"
+        className="fixed inset-x-0 top-0 z-50 h-px bg-gold-dim min-[1530px]:hidden"
       >
         <div
           className="h-full bg-gold transition-[width] duration-200 ease-out"
@@ -64,10 +96,10 @@ export function NetTrace() {
         />
       </div>
 
-      {/* desktop: the trace runs down the left margin, vias on each section */}
+      {/* wide sheets: the trace runs down the left margin, vias on each section */}
       <nav
         aria-label="Sheet index"
-        className="fixed left-0 top-1/2 z-50 hidden -translate-y-1/2 pl-6 min-[1560px]:block"
+        className="fixed left-0 top-1/2 z-50 hidden -translate-y-1/2 pl-6 min-[1530px]:block"
       >
         <div className="relative">
           {/* the conductor */}
@@ -119,5 +151,50 @@ export function NetTrace() {
         </div>
       </nav>
     </>
+  );
+}
+
+/**
+ * The same index, routed horizontally for sheets too narrow to carry the rail.
+ *
+ * It sits in the header rather than floating over the page: this sheet has no
+ * sticky header by design, and bolting a translucent bar to the top edge to
+ * solve a layout gap would cost more of the drawing than it buys. The top
+ * conductor stays fixed and keeps reporting position after the header scrolls
+ * away, which is the job it already had.
+ *
+ * Below lg the header has no room left once the monogram and the switch are
+ * placed, so it steps aside there.
+ */
+export function SheetIndex() {
+  const { active } = useSheetPosition();
+
+  return (
+    <nav
+      aria-label="Sheet index"
+      className="hidden items-center gap-5 lg:max-[1530px]:flex"
+    >
+      {SHEET.map((s, i) => (
+        <a
+          key={s.id}
+          href={`#${s.id}`}
+          aria-current={i === active ? "true" : undefined}
+          className="group flex items-center gap-2 py-2"
+        >
+          <span
+            aria-hidden="true"
+            className="via shrink-0"
+            data-live={i <= active ? "true" : "false"}
+          />
+          <span
+            className={`legend text-[0.5625rem] transition-colors group-hover:text-ink ${
+              i === active ? "text-ink" : "text-ink-3"
+            }`}
+          >
+            {s.label}
+          </span>
+        </a>
+      ))}
+    </nav>
   );
 }
