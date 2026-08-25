@@ -62,16 +62,21 @@ export function Portrait() {
           grammar the section headings use, so the portrait is captioned like
           every other footprint on the sheet rather than in its own format.
 
+          Set centred under the frame rather than spread to its edges. The three
+          elements are wildly uneven in width — 12px against 133 against 56 — so
+          pinning the outer two to the margins left a lopsided gap in the middle
+          and read as a mistake rather than as a measure.
+
           The name is never truncated. It is the widest element here and the
           column narrows to 14rem at md, where the row needs 225px of the 224 it
           is given — hence the tighter gap below lg, which buys the 7px that
           keeps all three on one line. If a font ever pushes it over anyway the
           row wraps and the batch drops beneath, rather than the name losing
           letters. */}
-      <figcaption className="legend mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[0.5625rem] text-ink-2 lg:gap-x-3">
+      <figcaption className="legend mt-3 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 text-center text-[0.5625rem] text-ink-2 lg:gap-x-3">
         <span className="shrink-0 text-gold-ink">U1</span>
         <span className="text-ink">{PROFILE.name}</span>
-        <span className="ml-auto shrink-0 whitespace-nowrap text-ink-3">
+        <span className="shrink-0 whitespace-nowrap text-ink-3">
           BSCPE {PROFILE.batch}
         </span>
       </figcaption>
