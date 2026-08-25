@@ -150,9 +150,9 @@ story.append(st)
 # ---------------------------------------------------------------- projects
 section("Projects")
 entry(
-    "Avocado Ripeness Monitor",
+    "Evergreen",
     "2026",
-    "Capstone Project  %s  Embedded Machine Learning" % DOT,
+    "Capstone Project  %s  Avocado Freshness Monitoring  %s  Embedded ML" % (DOT, DOT),
     [
         "Built an ESP32 WROOM rig reading BME680, SHT31 and MH-Z14A CO<sub>2</sub> sensors, "
         "streaming readings over Bluetooth Low Energy to an Expo / React Native application.",

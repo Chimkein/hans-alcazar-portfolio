@@ -114,8 +114,9 @@ export type Project = {
 export const PROJECTS: Project[] = [
   {
     ref: "U2",
-    name: "Avocado Ripeness Monitor",
-    kind: "Capstone Project · Embedded ML",
+    name: "Evergreen",
+    /** The name alone says nothing about fruit, so the rail carries the subject. */
+    kind: "Capstone Project · Avocado Freshness · Embedded ML",
     year: "2026",
     summary:
       "A sensor rig that reads the air around an avocado and tells you how ripe it is and roughly how many days of shelf life are left — without cutting it open. Ripening fruit gives off volatile compounds and carbon dioxide as it softens, so the composition of the air in a closed container is a usable proxy for what is happening under the skin. The rig samples that continuously and turns it into a plain answer: a ripeness stage, a day count, and whether to eat it now or leave it.",
