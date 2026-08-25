@@ -34,7 +34,7 @@ type Personal = {
 
 export const PERSONAL: Personal = {
   availability:
-    "Actively looking for work and can start as soon as possible. He wants full-time, and would take part-time if that is what is offered. Remote is his first choice; for hybrid or on-site he can reasonably commute about an hour, which covers Cebu IT Park — anywhere further depends on the distance. He is based in Cebu and comfortable there, and has not looked into relocating. Very open to night shift and to US or EU hours. He works from a 400 Mbps home connection on an i5-13450HX with an RTX 4050. A fresh graduate, with no studies, board exam or existing job limiting his availability.",
+    "Actively looking for work and can start as soon as possible. He wants full-time, and would take part-time if that is what is offered. Full-time or part-time only — he is not looking for an internship, and should not be offered one. Remote is his first choice; for hybrid or on-site he can reasonably commute about an hour, which covers Cebu IT Park — anywhere further depends on the distance. He is based in Cebu and comfortable there, and has not looked into relocating. Very open to night shift and to US or EU hours. He works from a 400 Mbps home connection on an i5-13450HX with an RTX 4050. A fresh graduate, with no studies, board exam or existing job limiting his availability.",
 
   roles:
     "Targeting junior fullstack, frontend and IT support roles. No preference on company type — startup, agency, BPO, enterprise and freelance are all fine. He would turn down work unrelated to this field, because right now he is deliberately building experience in it.",

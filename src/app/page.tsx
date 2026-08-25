@@ -405,7 +405,7 @@ export default function Home() {
               fullstack or AI role
             </p>
             <p className="prose-board mt-6 text-[1rem] text-ink-2">
-              Open to junior developer, internship and freelance work — remote,
+              Open to full-time or part-time junior developer roles — remote,
               or on-site around Cebu. The fastest way to reach me is email.
             </p>
 
