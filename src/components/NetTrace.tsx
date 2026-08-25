@@ -187,34 +187,64 @@ export function NetTrace() {
  */
 export function SheetIndex() {
   const { active, scrolled } = useSheetPosition();
+  const last = Math.max(1, SHEET.length - 1);
 
   return (
     <nav
       aria-label="Sheet index"
       data-lifted={scrolled ? "true" : "false"}
-      className="index-plate fixed left-1/2 top-[22px] z-50 hidden -translate-x-1/2 items-center gap-5 px-4 py-2 lg:max-[1530px]:flex"
+      className="index-plate fixed left-1/2 top-[14px] z-50 hidden -translate-x-1/2 px-3 py-2 lg:max-[1530px]:flex"
     >
-      {SHEET.map((s, i) => (
-        <a
-          key={s.id}
-          href={`#${s.id}`}
-          aria-current={i === active ? "true" : undefined}
-          className="group flex items-center gap-2 py-2"
-        >
-          <span
-            aria-hidden="true"
-            className="via shrink-0"
-            data-live={i <= active ? "true" : "false"}
-          />
-          <span
-            className={`legend text-[0.5625rem] transition-colors group-hover:text-ink ${
-              i === active ? "text-ink" : "text-ink-3"
-            }`}
-          >
-            {s.label}
-          </span>
-        </a>
-      ))}
+      <div className="relative">
+        {/* the conductor, run horizontally. Equal columns put the vias at 10%,
+            30%, 50%, 70% and 90%, so the trace spans first centre to last. */}
+        <span
+          aria-hidden="true"
+          className="absolute left-[10%] right-[10%] top-[6px] h-px bg-gold-dim"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute left-[10%] top-[6px] h-px bg-gold transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{ width: `${(active / last) * 80}%` }}
+        />
+
+        {/* grid, not flex: equal columns are what make the via positions
+            predictable enough to hang the conductor off percentages, and the
+            grid still sizes itself to the widest designator. */}
+        <ul className="relative grid grid-cols-5">
+          {SHEET.map((s, i) => (
+            <li key={s.id}>
+              <a
+                href={`#${s.id}`}
+                className="group flex flex-col items-center gap-2.5 px-3"
+                aria-current={i === active ? "true" : undefined}
+              >
+                <span
+                  aria-hidden="true"
+                  className="via shrink-0"
+                  data-live={i <= active ? "true" : "false"}
+                />
+                <span className="flex flex-col items-center leading-none">
+                  <span
+                    className={`legend text-[0.5625rem] transition-colors ${
+                      i === active ? "text-gold-ink" : "text-ink-3"
+                    }`}
+                  >
+                    {s.ref}
+                  </span>
+                  <span
+                    className={`legend mt-1 whitespace-nowrap text-[0.625rem] transition-colors group-hover:text-ink ${
+                      i === active ? "text-ink" : "text-ink-3"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </nav>
   );
 }
