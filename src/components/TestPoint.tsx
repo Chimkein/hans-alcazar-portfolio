@@ -64,6 +64,20 @@ function sessionId(): string {
   return id;
 }
 
+/**
+ * Strips a leading list marker off a paragraph.
+ *
+ * The prompt forbids lists, because the panel renders no markdown and an
+ * asterisk arrives on screen as an asterisk. Models drift back to bullets anyway
+ * the moment an answer covers several things, and the cost of that drift is a
+ * visitor reading "* An AI Content Generator" and concluding the site is broken.
+ * Cheap to catch here, so it is caught here too rather than trusted to the
+ * prompt alone.
+ */
+function unbullet(line: string): string {
+  return line.replace(/^\s*(?:[*•–-]|\d+[.)])\s+/, "");
+}
+
 const STARTERS = [
   "What has he actually built?",
   "How did the capstone work?",
@@ -283,7 +297,7 @@ export function TestPoint() {
                         p > 0 ? "mt-3" : ""
                       } ${t.role === "user" ? "text-ink" : "text-ink-2"}`}
                     >
-                      {para}
+                      {unbullet(para)}
                     </p>
                   ))}
                   {!t.content && busy && i === turns.length - 1 ? (
