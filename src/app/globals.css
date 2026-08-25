@@ -303,10 +303,17 @@ html {
     filter 620ms ease;
 }
 
+/* filter:none, not blur(0). A no-op blur is still a filter: it keeps the
+   compositing layer alive and keeps the element a containing block for its
+   descendants. The projects section is 4223px tall, so that is a ~20MB layer
+   held for the life of the page for no reason, and it was measurably changing
+   offsetParent for everything inside it. none releases both, and still
+   interpolates from blur(9px) because a filter list animating to none treats
+   none as the identity. */
 .reveal-armed [data-reveal][data-shown="true"] {
   opacity: 1;
   transform: none;
-  filter: blur(0);
+  filter: none;
 }
 
 /* Belt and braces alongside the check in Reveal.tsx: the component reads the

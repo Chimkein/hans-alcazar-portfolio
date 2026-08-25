@@ -36,9 +36,14 @@ export const PROFILE = {
   email: "hans.s.alcazar@gmail.com",
   phone: "0995 994 8436",
   resume: "/Hans-Alcazar-Resume.pdf",
-  /** The one-sentence pivot the whole page argues. */
+  /**
+   * The pivot the whole page argues. Every claim here is one the sheet backs
+   * up further down: the nine hours is the paper’s measured 9.32h mean error,
+   * the hardware really was handed over after the defence, and the user counts
+   * are his own — real users on the content tool, friends and family on the hub.
+   */
   statement:
-    "Computer Engineering graduate building across the whole stack — from an ESP32 sensor array running on-device inference, up to multi-model AI orchestration in Next.js.",
+    "Computer Engineering graduate building across the whole stack — from an ESP32 sensor array running on-device inference, up to multi-model AI orchestration in Next.js. The capstone shipped: a rig that reads the air around an avocado and calls its remaining shelf life to within about nine hours, now in the hands of the people it was built for. The web work is held to the same test — a content tool with real users behind it, and a self-hosted productivity hub that friends and family actually use.",
 } as const;
 
 /* ------------------------------------------------------------------
