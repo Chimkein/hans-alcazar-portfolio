@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { systemPrompt } from "@/lib/knowledge";
 
 export const runtime = "nodejs";
@@ -24,7 +25,10 @@ const MAX_TOKENS = 500;
 /** Per-IP throttle. In-memory, so it resets on cold start — the hard caps above
  *  are the real ceiling. Swap for Upstash if this ever gets genuinely abused. */
 const WINDOW_MS = 10 * 60 * 1000;
-const MAX_PER_WINDOW = 20;
+/** 20 was low enough that an engaged recruiter working through the record hit
+ *  the wall — which is precisely the visitor this exists for. The ceiling is
+ *  meant to stop abuse, not curiosity. */
+const MAX_PER_WINDOW = 40;
 const hits = new Map<string, number[]>();
 
 function throttled(ip: string): boolean {
@@ -110,6 +114,18 @@ function makeSSEParser(pick: (o: unknown) => string | undefined) {
   };
 }
 
+/** Carries the upstream status, so the caller can tell "rate limited" — which
+ *  clears on its own in seconds — apart from "actually broken". */
+function upstreamError(name: string, status: number) {
+  return Object.assign(new Error(`${name} ${status}`), { status });
+}
+
+function statusOf(e: unknown): number {
+  return typeof e === "object" && e !== null && "status" in e
+    ? Number((e as { status: unknown }).status) || 0
+    : 0;
+}
+
 async function groq(messages: Msg[]) {
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -126,7 +142,7 @@ async function groq(messages: Msg[]) {
       messages: [{ role: "system", content: systemPrompt() }, ...messages],
     }),
   });
-  if (!res.ok || !res.body) throw new Error(`groq ${res.status}`);
+  if (!res.ok || !res.body) throw upstreamError("groq", res.status);
   return { body: res.body, pick: (o: unknown) =>
       (o as { choices?: { delta?: { content?: string } }[] }).choices?.[0]?.delta?.content };
 }
@@ -147,7 +163,7 @@ async function gemini(messages: Msg[]) {
       })),
     }),
   });
-  if (!res.ok || !res.body) throw new Error(`gemini ${res.status}`);
+  if (!res.ok || !res.body) throw upstreamError("gemini", res.status);
   return { body: res.body, pick: (o: unknown) =>
       (o as { candidates?: { content?: { parts?: { text?: string }[] } }[] })
         .candidates?.[0]?.content?.parts?.[0]?.text };
@@ -186,13 +202,19 @@ export async function POST(req: Request) {
   let source: Awaited<ReturnType<typeof groq>>;
   try {
     source = await groq(messages);
-  } catch {
+  } catch (first) {
     try {
       source = await gemini(messages);
-    } catch {
+    } catch (second) {
+      // Both free tiers rate-limit, and both recover within seconds. Telling a
+      // visitor the assistant is "unavailable" when it is merely busy reads as
+      // broken, and they do not come back to check.
+      const busy = statusOf(first) === 429 || statusOf(second) === 429;
       return new Response(
-        "The assistant is unavailable right now. Hans can be reached at hans.s.alcazar@gmail.com.",
-        { status: 502 }
+        busy
+          ? "Cookie is getting a lot of questions at the moment. Give it a few seconds and ask again."
+          : "The assistant is unavailable right now. Hans can be reached at hans.s.alcazar@gmail.com.",
+        { status: busy ? 503 : 502, headers: busy ? { "Retry-After": "10" } : undefined }
       );
     }
   }
@@ -210,10 +232,42 @@ export async function POST(req: Request) {
    * hangs open until the client times out. Draining the upstream in a loop has
    * no such stall.
    */
+  /**
+   * The answer accumulates out here rather than inside `start`, because two
+   * other things need to read it: `cancel`, when the visitor closes the tab
+   * mid-sentence, and the logging pass below.
+   */
+  let answer = "";
+  let settle: () => void = () => {};
+  const finished = new Promise<void>((resolve) => {
+    settle = resolve;
+  });
+
+  /**
+   * Log with `after`, not with a bare fetch in `finally`.
+   *
+   * The response is over the moment the stream closes, and the platform is free
+   * to freeze the invocation at that point — a fetch started on the way out can
+   * be killed in flight, and the conversation disappears with no error anywhere.
+   * `after` is the supported way to hold work open past the response.
+   *
+   * The race is a backstop: if the stream somehow never settles, log what we
+   * have rather than hanging until the function times out.
+   */
+  after(async () => {
+    await Promise.race([
+      finished,
+      new Promise((r) => setTimeout(r, 30_000)),
+    ]);
+    await logConversation(sessionId, [
+      ...messages,
+      { role: "assistant", content: answer },
+    ]);
+  });
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const feed = makeSSEParser(source.pick);
-      let answer = "";
 
       const emit = (text: string) => {
         if (!text) return;
@@ -233,14 +287,12 @@ export async function POST(req: Request) {
         /* upstream cut out mid-answer — close with what we have */
       } finally {
         controller.close();
-        void logConversation(sessionId, [
-          ...messages,
-          { role: "assistant", content: answer },
-        ]);
+        settle();
       }
     },
     cancel() {
       reader.cancel();
+      settle();
     },
   });
 

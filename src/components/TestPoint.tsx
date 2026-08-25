@@ -12,12 +12,54 @@ const GREETING =
 const SEEN_KEY = "cookie-seen";
 const SESSION_KEY = "cookie-session";
 
+/**
+ * sessionStorage is not merely empty when a browser blocks storage — Safari
+ * with "Block All Cookies", some private modes, and sandboxed frames throw on
+ * access. One of those reads happens in an effect, and an effect that throws
+ * with no error boundary above it takes the whole page down, not just the chat.
+ *
+ * Losing the session id costs a grouped transcript. It must never cost the page.
+ */
+function readStore(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStore(key: string, value: string) {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* storage blocked or full — not worth a crash */
+  }
+}
+
+/**
+ * crypto.randomUUID exists only in a secure context, so it is missing over
+ * plain http — which is exactly how you'd open the dev server from a phone on
+ * the same wifi — and on Safari before 15.4. The fallback is not
+ * cryptographically strong, and does not need to be: it groups one visitor's
+ * turns in a log, nothing more.
+ */
+function uuid(): string {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+  } catch {
+    /* fall through */
+  }
+  return `s-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+}
+
 /** Groups one visitor's turns into a single logged conversation. */
 function sessionId(): string {
-  let id = sessionStorage.getItem(SESSION_KEY);
+  let id = readStore(SESSION_KEY);
   if (!id) {
-    id = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_KEY, id);
+    id = uuid();
+    writeStore(SESSION_KEY, id);
   }
   return id;
 }
@@ -58,7 +100,7 @@ export function TestPoint() {
   // message arriving rather than as decoration that was always there.
   // setState inside the timeout is async, so it never fires during the effect.
   useEffect(() => {
-    if (sessionStorage.getItem(SEEN_KEY)) return;
+    if (readStore(SEEN_KEY)) return;
     const id = setTimeout(() => setUnseen(true), 1400);
     return () => clearTimeout(id);
   }, []);
@@ -66,7 +108,7 @@ export function TestPoint() {
   function reveal() {
     setOpen(true);
     setUnseen(false);
-    sessionStorage.setItem(SEEN_KEY, "1");
+    writeStore(SEEN_KEY, "1");
   }
 
   // Escape closes; focus moves into the field on open
