@@ -432,12 +432,16 @@ export default function Home() {
               c.pending ? (
                 <li
                   key={c.ref}
-                  className="flex items-center gap-4 px-6 py-5"
+                  className="flex items-center gap-3 px-5 py-5 sm:gap-4 sm:px-6"
                   title="Add this URL in src/lib/content.ts"
                 >
                   <span className="data w-7 shrink-0 text-[0.75rem] text-ink-3">
                     {c.ref}
                   </span>
+                  <BrandIcon
+                    part={c.label}
+                    className="hidden h-4 w-4 shrink-0 text-ink-3 sm:block"
+                  />
                   <span className="legend text-[0.75rem] text-ink-3">
                     {c.label}
                   </span>
@@ -451,11 +455,15 @@ export default function Home() {
                     href={c.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="group flex items-center gap-4 px-6 py-5 transition-colors hover:bg-[var(--hover)]"
+                    className="group flex items-center gap-3 px-5 py-5 transition-colors hover:bg-[var(--hover)] sm:gap-4 sm:px-6"
                   >
                     <span className="data w-7 shrink-0 text-[0.75rem] text-gold-ink">
                       {c.ref}
                     </span>
+                    <BrandIcon
+                      part={c.label}
+                      className="hidden h-4 w-4 shrink-0 text-ink-3 transition-colors group-hover:text-gold-ink sm:block"
+                    />
                     <span className="legend text-[0.75rem] text-ink">
                       {c.label}
                     </span>

@@ -153,5 +153,3 @@ ${facts()}
 === END RECORD ===`;
 }
 
-/** True once the interview has been filled in — surfaced in the UI as a hint. */
-export const HAS_PERSONAL = filled.length > 0;

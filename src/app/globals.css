@@ -269,12 +269,6 @@ html {
   border-radius: 2px;
 }
 
-/* silkscreen outline — the white/graphite component boundary */
-.silk {
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-}
-
 /* a via: the plated through-hole that anchors a section */
 .via {
   width: 13px;
