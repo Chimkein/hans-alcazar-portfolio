@@ -8,6 +8,7 @@ import { BrandIcon } from "@/components/BrandIcons";
 import { Shots } from "@/components/Shots";
 import { BoardField } from "@/components/BoardField";
 import { TestPoint } from "@/components/TestPoint";
+import { Reveal } from "@/components/Reveal";
 import {
   PROFILE,
   BOM,
@@ -21,29 +22,35 @@ import {
 /**
  * The heading is the plain section name — Skills, About, Projects, Contact —
  * because that is what a visitor scans for, and it is what the net trace calls
- * the same section. The drawing's own term for it rides on the right as the
- * annotation, where it colours the page without having to be decoded.
+ * the same section.
+ *
+ * The right-hand annotation used to expand the designator, which meant it spent
+ * itself saying nothing: BOM sat opposite "Bill of materials", and NOTES opposite
+ * "Fabrication notes · 6 notes", which lands the same word three times in one
+ * line. The designator already carries the drawing's vocabulary. So the right
+ * side now carries only what the left cannot — how much of the thing there is,
+ * or where it stands.
  */
 function Rule({
   code: designator,
   title,
-  term,
-  meta,
+  note,
 }: {
   code: string;
   title: string;
-  term: string;
-  meta?: string;
+  note: string;
 }) {
   return (
     <div className="mb-10 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b border-gold/45 pb-3">
-      <span className="legend shrink-0 text-[0.625rem] text-gold-ink">
+      {/* fixed column: designators run 23-35px wide, so letting the title
+          follow them naturally staggered every heading on the sheet by up to
+          12px. A drawing lines its designators up. */}
+      <span className="legend w-12 shrink-0 text-[0.625rem] text-gold-ink">
         {designator}
       </span>
       <h2 className="legend text-[1rem] text-ink">{title}</h2>
       <span className="legend ml-auto shrink-0 text-[0.5625rem] text-ink-3">
-        {term}
-        {meta ? ` · ${meta}` : ""}
+        {note}
       </span>
     </div>
   );
@@ -61,6 +68,7 @@ function Section({
   return (
     <section
       id={id}
+      data-reveal=""
       className={`mx-auto w-full max-w-[76rem] scroll-mt-20 px-6 py-14 md:px-10 md:py-20 ${className}`}
     >
       {children}
@@ -205,6 +213,7 @@ export default function Home() {
     <div className="board themed min-h-screen">
       <BoardField />
       <NetTrace />
+      <Reveal />
       <SheetIndex />
       <TestPoint />
 
@@ -291,8 +300,7 @@ export default function Home() {
         <Rule
           code="BOM"
           title="Skills"
-          term="Bill of materials"
-          meta={`${BOM.length} items`}
+          note={`${BOM.length} items`}
         />
 
         <div className="space-y-11">
@@ -349,8 +357,7 @@ export default function Home() {
         <Rule
           code="NOTES"
           title="About"
-          term="Fabrication notes"
-          meta={`${NOTES.length} notes`}
+          note={`${NOTES.length} entries`}
         />
 
         <ol className="grid gap-x-16 gap-y-9 lg:grid-cols-2">
@@ -372,8 +379,7 @@ export default function Home() {
         <Rule
           code="U2–U4"
           title="Projects"
-          term="Component footprints"
-          meta={`${PROJECTS.length} projects`}
+          note={`${PROJECTS.length} footprints`}
         />
 
         <div className="space-y-8">
@@ -388,8 +394,7 @@ export default function Home() {
         <Rule
           code="J1–J5"
           title="Contact"
-          term="Connectors"
-          meta="Open for work"
+          note="Open for work"
         />
 
         <div className="grid gap-14 lg:grid-cols-[1fr_28rem] lg:gap-20">
