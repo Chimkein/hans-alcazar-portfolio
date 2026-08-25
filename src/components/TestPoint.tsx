@@ -265,16 +265,31 @@ export function TestPoint() {
                 <div className="legend mb-1.5 text-[0.5rem] text-ink-3">
                   {t.role === "user" ? "You" : "Cookie"}
                 </div>
-                <p
-                  className={`text-[0.875rem] leading-relaxed ${
-                    t.role === "user"
-                      ? "border-l border-gold pl-3 text-ink"
-                      : "text-ink-2"
-                  }`}
+                {/* One paragraph per line break. The reply arrived as a single
+                    <p>, and HTML collapses newlines to spaces, so a long answer
+                    landed as one unbroken slab no matter how the model set it
+                    out. Splitting on any run of newlines rather than on blank
+                    lines only means a break appears whether the model separates
+                    with one newline or two. */}
+                <div
+                  className={
+                    t.role === "user" ? "border-l border-gold pl-3" : undefined
+                  }
                 >
-                  {t.content ||
-                    (busy && i === turns.length - 1 ? "…" : "")}
-                </p>
+                  {(t.content ? t.content.split(/\n+/) : []).map((para, p) => (
+                    <p
+                      key={p}
+                      className={`text-[0.875rem] leading-relaxed ${
+                        p > 0 ? "mt-3" : ""
+                      } ${t.role === "user" ? "text-ink" : "text-ink-2"}`}
+                    >
+                      {para}
+                    </p>
+                  ))}
+                  {!t.content && busy && i === turns.length - 1 ? (
+                    <p className="text-[0.875rem] leading-relaxed text-ink-2">…</p>
+                  ) : null}
+                </div>
 
                 {t.resume ? (
                   <a
