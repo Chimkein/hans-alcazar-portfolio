@@ -38,15 +38,23 @@ All five environment variables are set, for Production and Preview:
 canonical link, the sitemap, robots.txt, Open Graph and the JSON-LD. It is baked
 in at build time, so changing it takes a redeploy, not just a settings edit.
 
+## Cookie's knowledge
+
+All twelve `PERSONAL` fields are answered, compiled from
+[KNOWLEDGE-INTERVIEW.md](KNOWLEDGE-INTERVIEW.md).
+
+Several of the answers were directives rather than facts — never quote a salary,
+never give out the phone number, offer the résumé on hiring interest, deflect
+politely. Those live in the prompt rules in
+[src/lib/knowledge.ts](src/lib/knowledge.ts) rather than in the data blob,
+because a rule the model is told to follow holds better than a fact it is
+invited to paraphrase.
+
+His phone number is absent from the record entirely, on the same logic: the
+surest way to stop a model handing out a number is for the number never to reach
+it. Note that it is still printed in the contact section and on the résumé PDF.
+
 ## Still to do
-
-### Answer the interview
-
-[KNOWLEDGE-INTERVIEW.md](KNOWLEDGE-INTERVIEW.md) — currently **0 of 12** fields
-filled, so Cookie only knows what is printed on the page. Ask it "is he
-available for work?" today and it correctly says it does not know. That is the
-honest behaviour working, but the interview is what makes the assistant worth
-having.
 
 ### Housekeeping
 
