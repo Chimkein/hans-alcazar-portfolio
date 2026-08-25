@@ -1,13 +1,13 @@
-import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Portrait } from "@/components/Portrait";
 import { NetTrace, SheetIndex } from "@/components/NetTrace";
-import { ArrowUpRight, ArrowDown, ArrowUp } from "@/components/Icons";
+import { ArrowUpRight, ArrowDown } from "@/components/Icons";
 import { BrandIcon } from "@/components/BrandIcons";
 import { Shots } from "@/components/Shots";
 import { BoardField } from "@/components/BoardField";
 import { TestPoint } from "@/components/TestPoint";
+import { BackToTop } from "@/components/BackToTop";
 import { Reveal } from "@/components/Reveal";
 import {
   PROFILE,
@@ -513,13 +513,7 @@ export default function Home() {
           <span className="legend text-[0.5625rem] text-ink-3">
             Built with Next.js, TypeScript and Tailwind — the sheet is the sample
           </span>
-          <Link
-            href="#overview"
-            className="legend -my-2 inline-flex items-center gap-2 py-2 text-[0.5625rem] text-ink-3 transition-colors hover:text-gold-ink"
-          >
-            Back to top
-            <ArrowUp className="h-3 w-3" />
-          </Link>
+          <BackToTop />
         </div>
       </footer>
     </div>
