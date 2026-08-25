@@ -65,17 +65,27 @@ function sessionId(): string {
 }
 
 /**
- * Strips a leading list marker off a paragraph.
+ * Strips markdown the panel cannot render.
  *
- * The prompt forbids lists, because the panel renders no markdown and an
- * asterisk arrives on screen as an asterisk. Models drift back to bullets anyway
- * the moment an answer covers several things, and the cost of that drift is a
- * visitor reading "* An AI Content Generator" and concluding the site is broken.
- * Cheap to catch here, so it is caught here too rather than trusted to the
- * prompt alone.
+ * The prompt forbids all of it, because nothing here renders markdown and an
+ * asterisk arrives on screen as an asterisk. The model complies most of the
+ * time and then does not: asked to walk through three projects it came back
+ * with "**Evergreen - the avocado freshness capstone**" as a heading and set
+ * the rest as bullets. A visitor reading that concludes the site is broken,
+ * and they are the people this page exists for.
+ *
+ * So the prompt is the fix and this is the net under it. It only removes
+ * syntax, never words, so the worst case is a stray backtick disappearing
+ * from a sentence that meant to keep it.
  */
-function unbullet(line: string): string {
-  return line.replace(/^\s*(?:[*•–-]|\d+[.)])\s+/, "");
+function plain(line: string): string {
+  return line
+    .replace(/^\s*(?:[*•–-]|\d+[.)])\s+/, "")
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .trim();
 }
 
 const STARTERS = [
@@ -297,7 +307,7 @@ export function TestPoint() {
                         p > 0 ? "mt-3" : ""
                       } ${t.role === "user" ? "text-ink" : "text-ink-2"}`}
                     >
-                      {unbullet(para)}
+                      {plain(para)}
                     </p>
                   ))}
                   {!t.content && busy && i === turns.length - 1 ? (
