@@ -58,16 +58,22 @@ export function Portrait() {
         </div>
       </div>
 
-      {/* Designator and batch ride the data row; the name gets its own line so
-          it can be set in full rather than truncated to initials. */}
-      <figcaption className="legend mt-3 text-[0.5625rem] text-ink-2">
-        <span className="flex items-baseline justify-between gap-3">
-          <span className="text-gold-ink">U1</span>
-          <span className="whitespace-nowrap text-ink-3">
-            BSCPE {PROFILE.batch}
-          </span>
+      {/* One data row, read left to right: designator, part, batch — the same
+          grammar the section headings use, so the portrait is captioned like
+          every other footprint on the sheet rather than in its own format.
+
+          The name is never truncated. It is the widest element here and the
+          column narrows to 14rem at md, where the row needs 225px of the 224 it
+          is given — hence the tighter gap below lg, which buys the 7px that
+          keeps all three on one line. If a font ever pushes it over anyway the
+          row wraps and the batch drops beneath, rather than the name losing
+          letters. */}
+      <figcaption className="legend mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[0.5625rem] text-ink-2 lg:gap-x-3">
+        <span className="shrink-0 text-gold-ink">U1</span>
+        <span className="text-ink">{PROFILE.name}</span>
+        <span className="ml-auto shrink-0 whitespace-nowrap text-ink-3">
+          BSCPE {PROFILE.batch}
         </span>
-        <span className="mt-1.5 block text-ink">{PROFILE.name}</span>
       </figcaption>
     </figure>
   );
