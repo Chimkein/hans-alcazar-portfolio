@@ -254,12 +254,29 @@ export const PROJECTS: Project[] = [
       "Next.js 16 App Router and TypeScript over PostgreSQL (Neon) with Prisma, and Auth.js v5 for Google sign-in on JWT sessions — no paid tier anywhere in the stack, so it runs at effectively zero cost.",
       "Identity is deliberately strict for a marketplace: one verified Google account and one unique phone number per person, enforced by database constraints, with selling gated behind an extra admin-approved verification step.",
       "Orders are modelled per seller — one checkout fans out into Order → SellerOrder → OrderItem — so each seller carries their own payment and fulfilment status instead of sharing a single order state.",
-      "Phase one is done — the scaffold, authentication, database and onboarding — with the marketplace, storefronts, multi-seller cart and in-app messaging as the phases still ahead.",
+      "The landing, marketplace browsing with categories and search, and Google sign-in are live on an early deploy — seeded with demo listings — while seller onboarding, multi-seller checkout and in-app messaging are the parts still being built.",
     ],
     uses: ["L4", "F1", "F2", "F3", "L7"],
-    links: [],
+    shots: [
+      {
+        src: "/shots/ven-home.webp",
+        label: "Home",
+        alt: "Vendora's landing page: a dark hero reading “Your store. Your products. Your marketplace.”, a search field with popular-term chips, and a mosaic of product photos carrying a 4.9 average seller-rating badge.",
+      },
+      {
+        src: "/shots/ven-browse.webp",
+        label: "Browse",
+        alt: "The marketplace browse page: a search bar over category filters, and a grid of listings each with a product photo, title, seller name, Consolacion location, a peso price and a cash-on-delivery badge.",
+      },
+      {
+        src: "/shots/ven-signin.webp",
+        label: "Sign-in",
+        alt: "The sign-in screen: a Welcome card with a Continue with Google button and a note that each account is one person — one Google login bound to one mobile number.",
+      },
+    ],
+    links: [{ label: "Live demo", href: "https://vendora-shop.vercel.app" }],
     linkNote:
-      "In active development — phase 1 of 6. Not yet deployed or published to GitHub; the source and a live demo will follow. Walkthrough available on request.",
+      "An early public deploy seeded with demo listings — the seller tools, multi-seller checkout and in-app messaging are still in progress, and the source is not open yet. Walkthrough available on request.",
   },
 ];
 
