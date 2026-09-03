@@ -374,10 +374,10 @@ export default function Home() {
         </ol>
       </Section>
 
-      {/* ── U2–U4 · PROJECTS ─────────────────────────────────────── */}
+      {/* ── U2–U5 · PROJECTS ─────────────────────────────────────── */}
       <Section id="projects">
         <Rule
-          code="U2–U4"
+          code="U2–U5"
           title="Projects"
           note={`${PROJECTS.length} footprints`}
         />

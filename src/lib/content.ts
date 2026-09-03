@@ -81,7 +81,7 @@ export const BOM: BomItem[] = [
 ];
 
 /* ------------------------------------------------------------------
-   COMPONENT FOOTPRINTS — the three projects. U1 is the portrait, so these run U2-U4.
+   COMPONENT FOOTPRINTS — the projects. U1 is the portrait, so these run U2 onward.
    ------------------------------------------------------------------ */
 
 export type ProjectLink = {
@@ -136,6 +136,7 @@ export const PROJECTS: Project[] = [
       "Both architectures were built and compared — inference on the ESP32 itself (56 KB tensor arena, no internet needed) against inference on the phone (larger model, better shelf-life accuracy). The phone-side design won on error margin.",
       "Retrained on a merged 1,293-row dataset and verified by matching the app's predictions against the Python CLI output value for value.",
       "The app carries the whole loop, not just a number: a live Standard Readings panel for gas, humidity, temperature and CO₂; a per-sensor Reading History that logs every sample with its absolute and percentage change so drift is visible; a Settings screen for choosing which sensors to track; and a Freshness Report that states the predicted shelf life next to the raw readings it was derived from, so the prediction can always be checked against its own inputs.",
+      "On the paper's own evaluation the deployed model averaged 9.32 hours of error on shelf-life prediction and received all 50 sensor-to-app transmission attempts — set against postharvest avocado losses that reach as much as 43 percent in some developing regions, which is the loss the system exists to cut.",
     ],
     uses: ["L5", "L6", "L4", "F1"],
     shotFrame: "device",
@@ -241,6 +242,25 @@ export const PROJECTS: Project[] = [
       { label: "Source", href: "https://github.com/Chimkein/lifeflow" },
     ],
   },
+  {
+    ref: "U5",
+    name: "Vendora",
+    /** In progress on purpose — the kind line says so before anyone scrolls. */
+    kind: "Web Application · Community Marketplace · In progress",
+    year: "2026",
+    summary:
+      "A community marketplace where members both buy and sell, built free-first — no payment processor and no subscription anywhere in it. Rather than route money through the app, a buyer places an order and the two sides settle it directly, cash on delivery or pay-first, whichever the seller chooses. The first release is aimed at a small, trusted group rather than the open web, so the early work is the trust model — verified identity, per-seller sub-orders, admin-approved selling — before any reach for scale.",
+    detail: [
+      "Next.js 16 App Router and TypeScript over PostgreSQL (Neon) with Prisma, and Auth.js v5 for Google sign-in on JWT sessions — no paid tier anywhere in the stack, so it runs at effectively zero cost.",
+      "Identity is deliberately strict for a marketplace: one verified Google account and one unique phone number per person, enforced by database constraints, with selling gated behind an extra admin-approved verification step.",
+      "Orders are modelled per seller — one checkout fans out into Order → SellerOrder → OrderItem — so each seller carries their own payment and fulfilment status instead of sharing a single order state.",
+      "Phase one is done — the scaffold, authentication, database and onboarding — with the marketplace, storefronts, multi-seller cart and in-app messaging as the phases still ahead.",
+    ],
+    uses: ["L4", "F1", "F2", "F3", "L7"],
+    links: [],
+    linkNote:
+      "In active development — phase 1 of 6. Not yet deployed or published to GitHub; the source and a live demo will follow. Walkthrough available on request.",
+  },
 ];
 
 /* ------------------------------------------------------------------
@@ -254,7 +274,7 @@ export const NOTES: { n: number; text: string }[] = [
   },
   {
     n: 2,
-    text: "Currently teaching myself fullstack and AI engineering. The three projects on this sheet are the record of that — each one taught me a layer I did not have before, and I would rather be judged on them than on a list of adjectives.",
+    text: "Currently teaching myself fullstack and AI engineering. The projects on this sheet are the record of that — each one taught me a layer I did not have before, and I would rather be judged on them than on a list of adjectives.",
   },
   {
     n: 3,
@@ -327,6 +347,6 @@ export const SHEET = [
   { id: "overview", ref: "U1", label: "Overview" },
   { id: "skills", ref: "BOM", label: "Skills" },
   { id: "about", ref: "NOTES", label: "About" },
-  { id: "projects", ref: "U2–U4", label: "Projects" },
+  { id: "projects", ref: "U2–U5", label: "Projects" },
   { id: "contact", ref: "J1–J5", label: "Contact" },
 ] as const;
